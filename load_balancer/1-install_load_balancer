@@ -40,8 +40,8 @@ frontend idarapatrick-tech-frontend
 
 backend idarapatrick-tech-backend
     balance roundrobin
-    server 6098-web-01 35.175.184.4:80 check
-    server 6098-web-02 3.95.66.15:80 check
+    server 6905-web-01 13.218.66.188  check
+    server 6905-web-02 3.84.46.16 check
 "
 
 # shellcheck disable=SC2154
@@ -61,3 +61,4 @@ fi
 echo -e "web-01 web-02"
 echo "web-01"
 echo "web-02"
+
