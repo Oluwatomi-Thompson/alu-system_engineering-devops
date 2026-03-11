@@ -1,25 +1,17 @@
 onfigures a new Ubuntu machine with HAproxy to load balance web-01 and web-02
-
 sudo apt-get update -y
 sudo apt-get install -y haproxy
-
-# Build the configuration string using the IPs provided in your project
-# Note: Ensure the names "web-01" and "web-02" are exactly as below
-haproxy_conf="frontend alu-frontend
+# Add the configuration to the end of the file
+echo "frontend alu-frontend
     bind *:80
     mode http
     default_backend alu-backend
-
 backend alu-backend
     balance roundrobin
     server web-01 13.218.66.188:80 check
-    server web-02 3.84.46.16:80 check"
-
-# Append the config to the end of the haproxy.cfg file
-echo "$haproxy_conf" | sudo tee -a /etc/haproxy/haproxy.cfg > /dev/null
-
+    server web-02 3.84.46.16:80 check" | sudo tee -a /etc/haproxy/haproxy.cfg > /dev/null
 # Enable HAproxy to be managed by init script
 sudo sed -i "s/ENABLED=0/ENABLED=1/" /etc/default/haproxy
-
-# Restart the service to apply changes
+# Restart the service
 sudo service haproxy restart
+
