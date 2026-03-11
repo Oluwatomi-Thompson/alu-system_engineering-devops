@@ -1,4 +1,5 @@
-onfigures a new Ubuntu machine with HAproxy to load balance web-01 and web-02
+#!usr/bin/env bash
+#Configures a new Ubuntu machine with HAproxy to load balance web-01 and web-02
 sudo apt-get update -y
 sudo apt-get install -y haproxy
 # Add the configuration to the end of the file
