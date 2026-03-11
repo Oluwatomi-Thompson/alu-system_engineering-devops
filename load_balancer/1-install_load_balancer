@@ -1,64 +1,25 @@
-#!/usr/bin/env bash
-# install load balancer
+onfigures a new Ubuntu machine with HAproxy to load balance web-01 and web-02
 
+sudo apt-get update -y
+sudo apt-get install -y haproxy
 
-echo -e "Updating and doing some minor checks...\n"
-
-function install() {
-	command -v "$1" &> /dev/null
-
-	#shellcheck disable=SC2181
-	if [ $? -ne 0 ]; then
-		echo -e "	Installing: $1\n"
-		sudo apt-get update -y -qq && \
-			sudo apt-get install -y "$1" -qq
-		echo -e "\n"
-	else
-		echo -e "	${1} is already installed.\n"
-	fi
-}
-
-install haproxy #install haproxy
-
-echo -e "\nSetting up some minor stuff.\n"
-
-# backup default server config file
-sudo cp /etc/haproxy/haproxy.cfg haproxy_default.backup
-
-server_config=\
-"
-defaults
-  mode http
-  timeout client 15s
-  timeout connect 10s
-  timeout server 15s
-  timeout http-request 10s
-
-frontend idarapatrick-tech-frontend
+# Build the configuration string using the IPs provided in your project
+# Note: Ensure the names "web-01" and "web-02" are exactly as below
+haproxy_conf="frontend alu-frontend
     bind *:80
-    default_backend idarapatrick-tech-backend
+    mode http
+    default_backend alu-backend
 
-backend idarapatrick-tech-backend
+backend alu-backend
     balance roundrobin
-    server 6905-web-01 13.218.66.188  check
-    server 6905-web-02 3.84.46.16 check
-"
+    server web-01 13.218.66.188:80 check
+    server web-02 3.84.46.16:80 check"
 
-# shellcheck disable=SC2154
-echo "$server_config" | sudo dd status=none of=/etc/haproxy/haproxy.cfg
+# Append the config to the end of the haproxy.cfg file
+echo "$haproxy_conf" | sudo tee -a /etc/haproxy/haproxy.cfg > /dev/null
 
-# enable haproxy to be started by init script
-echo "ENABLED=1" | sudo dd status=none of=/etc/default/haproxy
+# Enable HAproxy to be managed by init script
+sudo sed -i "s/ENABLED=0/ENABLED=1/" /etc/default/haproxy
 
-echo "configured - Roundrobin On web-01 & web-02"
-
-if [ "$(pgrep -c haproxy)" -le 0 ]; then
-	sudo service haproxy start
-else
-	sudo service haproxy restart
-fi
-
-echo -e "web-01 web-02"
-echo "web-01"
-echo "web-02"
-
+# Restart the service to apply changes
+sudo service haproxy restart
